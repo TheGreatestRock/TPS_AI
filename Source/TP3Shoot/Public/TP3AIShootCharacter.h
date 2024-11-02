@@ -28,4 +28,5 @@ protected:
 public:
 	// Function to initialize AI with the Behavior Tree
 	UBehaviorTree* GetBehaviorTree() const;
+
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Components/WidgetComponent.h"
 #include "TP3ShootCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -77,7 +78,7 @@ protected:
 
 	void StopAiming();
 
-	// Firing function
+	// Firing function can be called from the blueprint
 	void Fire();
 
 	void BoostSpeed();
@@ -89,7 +90,6 @@ protected:
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	// End of APawn interface
 
 public:
 	/** Returns CameraBoom subobject **/
@@ -107,5 +107,22 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Firing")
 	bool IsFiring;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float MaxHealth = 100.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	float CurrentHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
+	FVector SpawnLocation;
+
+	// Function to take damage
+	void TakeDamage(float DamageAmount);
+
+	// Function to respawn at a specific location
+	void Respawn(FVector RespawnLocation);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
+	TArray<ATP3ShootCharacter*> Teammates;
 };
 

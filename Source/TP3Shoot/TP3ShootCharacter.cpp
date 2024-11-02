@@ -59,6 +59,7 @@ ATP3ShootCharacter::ATP3ShootCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	CurrentHealth = MaxHealth; // Initialize health
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -120,29 +121,86 @@ void ATP3ShootCharacter::StopAiming()
 
 void ATP3ShootCharacter::Fire()
 {
-	FVector Start, LineTraceEnd, ForwardVector;
+	if (!IsAiming) return;
 
-	if (IsAiming)
+	// Start the trace from the gun's muzzle
+	FVector MuzzleLocation = SK_Gun->GetSocketLocation("MuzzleFlash");
+	FVector CameraLocation = FollowCamera->GetComponentLocation();
+	FVector ForwardVector = FollowCamera->GetForwardVector();
+
+	// Calculate an endpoint far away in the direction the camera is facing
+	FVector CenterScreenTraceEnd = CameraLocation + (ForwardVector * 10000);
+
+	// Perform a line trace from the camera to the center of the screen
+	FHitResult CameraHitResult;
+	FCollisionQueryParams Params;
+
+	// Perform the first line trace from the camera
+	bool bHitCamera = GetWorld()->LineTraceSingleByChannel(
+		CameraHitResult,
+		CameraLocation,
+		CenterScreenTraceEnd,
+		ECC_Visibility,
+		Params
+	);
+
+	// Log details if the first trace hit something
+	if (bHitCamera)
 	{
-
-		Start = FollowCamera->GetComponentLocation();
-
-		ForwardVector = FollowCamera->GetForwardVector();
-
-		LineTraceEnd = Start + (ForwardVector * 10000);
+		UE_LOG(LogTemp, Warning, TEXT("Camera Hit!"));
+		UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *CameraHitResult.Location.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *CameraHitResult.GetActor()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *CameraHitResult.GetComponent()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Impact Normal: %s"), *CameraHitResult.ImpactNormal.ToString());
+		//if the camera hit that can be cast to a TP3ShootCharacter
+		if (ATP3ShootCharacter* HitCharacter = Cast<ATP3ShootCharacter>(CameraHitResult.GetActor()))
+		{
+			// Call TakeDamage function
+			HitCharacter->TakeDamage(10);
+		}
 	}
-	else {
 
-		// Get muzzle location
-		Start = SK_Gun->GetSocketLocation("MuzzleFlash");
+	FVector TargetPoint = bHitCamera ? CameraHitResult.Location : CenterScreenTraceEnd;
 
-		// Get Rotation Forward Vector
-		ForwardVector = FollowCamera->GetForwardVector();
+	// Perform a second line trace from the muzzle to the target point
+	FHitResult MuzzleHitResult;
+	bool bHitMuzzle = GetWorld()->LineTraceSingleByChannel(
+		MuzzleHitResult,
+		MuzzleLocation,
+		TargetPoint,
+		ECC_Visibility,
+		Params
+	);
 
-		// Get End Point
-		LineTraceEnd = Start + (ForwardVector * 10000);
+	// Log details if the second trace hit something
+	if (bHitMuzzle)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Muzzle Hit!"));
+		UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *MuzzleHitResult.Location.ToString());
+		UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *MuzzleHitResult.GetActor()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Hit Component: %s"), *MuzzleHitResult.GetComponent()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Impact Normal: %s"), *MuzzleHitResult.ImpactNormal.ToString());
 	}
+
+	// Determine the final end point of the trace
+	FVector LineTraceEnd = bHitMuzzle ? MuzzleHitResult.Location : TargetPoint;
+
+	// Draw a debug line from the muzzle to the calculated end point
+	DrawDebugLine(
+		GetWorld(),
+		MuzzleLocation,
+		LineTraceEnd,
+		FColor::Red,       // Line color
+		false,             // Persistent (will stay) or not
+		1.0f,              // Duration the line will be drawn
+		0,                 // Depth priority
+		1.0f               // Line thickness
+	);
+
+	UE_LOG(LogTemp, Warning, TEXT("Fire!"));
 }
+
+
 
 
 
@@ -227,4 +285,23 @@ void ATP3ShootCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 	}
+}
+
+void ATP3ShootCharacter::TakeDamage(float DamageAmount)
+{
+	if (DamageAmount <= 0) return;
+
+	CurrentHealth -= DamageAmount;
+	if (CurrentHealth <= 0)
+	{
+		// Handle death
+		Respawn(SpawnLocation);
+	}
+}
+
+
+void ATP3ShootCharacter::Respawn(FVector RespawnLocation)
+{
+	SetActorLocation(RespawnLocation); // Move to spawn location
+	CurrentHealth = MaxHealth; // Reset health
 }
