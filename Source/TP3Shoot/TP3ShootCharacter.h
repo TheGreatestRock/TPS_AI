@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Components/WidgetComponent.h"
+#include "Perception/AIPerceptionStimuliSourceComponent.h"
 #include "TP3ShootCharacter.generated.h"
 
 UCLASS(config=Game)
@@ -28,7 +29,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
-protected:
+public:
 
 	// Add a gun skeletal mesh component
 	UPROPERTY(VisibleDefaultsOnly, Category = Mesh)
@@ -122,7 +123,15 @@ public:
 	// Function to respawn at a specific location
 	void Respawn(FVector RespawnLocation);
 
+	void ShootAtLocation(FVector TargetLocation);
+
+	void FireAtTarget(FVector TargetLocation);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
 	TArray<ATP3ShootCharacter*> Teammates;
+
+
+    private:
+        FTimerHandle FireTimerHandle;
 };
 

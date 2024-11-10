@@ -10,6 +10,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
+#include <Perception/AISense_Sight.h>
+#include <BehaviorTree/BlackboardComponent.h>
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -60,6 +62,8 @@ ATP3ShootCharacter::ATP3ShootCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 	CurrentHealth = MaxHealth; // Initialize health
+
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -134,6 +138,7 @@ void ATP3ShootCharacter::Fire()
 	// Perform a line trace from the camera to the center of the screen
 	FHitResult CameraHitResult;
 	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
 
 	// Perform the first line trace from the camera
 	bool bHitCamera = GetWorld()->LineTraceSingleByChannel(
@@ -293,6 +298,7 @@ void ATP3ShootCharacter::TakeDamage(float DamageAmount)
 
 	CurrentHealth -= DamageAmount;
 	if (CurrentHealth <= 0)
+	if (CurrentHealth <= 0)
 	{
 		// Handle death
 		Respawn(SpawnLocation);
@@ -304,4 +310,98 @@ void ATP3ShootCharacter::Respawn(FVector RespawnLocation)
 {
 	SetActorLocation(RespawnLocation); // Move to spawn location
 	CurrentHealth = MaxHealth; // Reset health
+}
+
+void ATP3ShootCharacter::ShootAtLocation(FVector TargetLocation)
+{
+	// Step 1: Calculate the direction to the target and normalize
+	FVector DirectionToTarget = (TargetLocation - GetActorLocation()).GetSafeNormal();
+
+	// Step 2: Convert this direction into a rotation, locking pitch for horizontal aiming
+	FRotator TargetRotation = FRotationMatrix::MakeFromX(DirectionToTarget).Rotator();
+	TargetRotation.Pitch = 0;  // Lock pitch to avoid aiming up or down
+
+	// Step 3: Rotate the character or controller to face the target
+	if (Controller)
+	{
+		Controller->SetControlRotation(TargetRotation);
+	}
+	else
+	{
+		SetActorRotation(TargetRotation);  // Fallback for rotation if no controller
+	}
+
+	// Log rotation for debugging
+	//UE_LOG(LogTemp, Warning, TEXT("Character rotated to face target location: %s"), *TargetRotation.ToString());
+
+	// Step 4: Execute the custom fire function
+	//GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FTimerDelegate::CreateUObject(this, &ATP3ShootCharacter::FireAtTarget, TargetLocation), 0.2f, false);
+	FireAtTarget(TargetLocation);
+}
+
+void ATP3ShootCharacter::FireAtTarget(FVector TargetLocation)
+{
+	// Muzzle location for spawning particles and determining shot direction
+	FVector MuzzleLocation = SK_Gun->GetSocketLocation("MuzzleFlash");
+
+	// Trace from muzzle to target location
+	FHitResult HitResult;
+	FCollisionQueryParams TraceParams(SCENE_QUERY_STAT(WeaponTrace), true, this);
+
+	// Perform line trace from the muzzle to the target location
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		HitResult,
+		MuzzleLocation,
+		TargetLocation,
+		ECC_Visibility,
+		TraceParams
+	);
+
+	// Step 5: Process hit results and spawn visual effects
+	if (bHit)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.GetActor()->GetName());
+		UE_LOG(LogTemp, Warning, TEXT("Hit Location: %s"), *HitResult.Location.ToString());
+
+		AActor* HitActor = HitResult.GetActor();
+		if (HitActor)
+		{
+			// Check if the hit actor is of type ATP3ShootCharacter
+			if (ATP3ShootCharacter* HitCharacter = Cast<ATP3ShootCharacter>(HitActor))
+			{
+				HitCharacter->TakeDamage(10); // Apply damage if the cast is successful
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Hit actor is not a TP3ShootCharacter: %s"), *HitActor->GetName());
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("HitResult.GetActor() returned null."));
+		}
+
+		// Play hit particle at impact location
+		FireParticle(MuzzleLocation, HitResult.Location);
+	}
+	else
+	{
+		// If no hit, trace endpoint for visual effect
+		FireParticle(MuzzleLocation, TargetLocation);
+	}
+
+	// Step 6: Draw debug line for visual feedback (optional)
+	DrawDebugLine(
+		GetWorld(),
+		MuzzleLocation,
+		bHit ? HitResult.Location : TargetLocation,
+		FColor::Red,
+		false,
+		1.0f,
+		0,
+		1.0f
+	);
+
+	// Log firing event
+	UE_LOG(LogTemp, Warning, TEXT("Shot fired at target location!"));
 }
