@@ -314,30 +314,23 @@ void ATP3ShootCharacter::Respawn(FVector RespawnLocation)
 
 void ATP3ShootCharacter::ShootAtLocation(FVector TargetLocation)
 {
-	// Step 1: Calculate the direction to the target and normalize
+	
 	FVector DirectionToTarget = (TargetLocation - GetActorLocation()).GetSafeNormal();
+	FRotator TargetRotation = DirectionToTarget.Rotation();
+	TargetRotation.Pitch = 0;
 
-	// Step 2: Convert this direction into a rotation, locking pitch for horizontal aiming
-	FRotator TargetRotation = FRotationMatrix::MakeFromX(DirectionToTarget).Rotator();
-	TargetRotation.Pitch = 0;  // Lock pitch to avoid aiming up or down
-
-	// Step 3: Rotate the character or controller to face the target
 	if (Controller)
 	{
 		Controller->SetControlRotation(TargetRotation);
 	}
 	else
 	{
-		SetActorRotation(TargetRotation);  // Fallback for rotation if no controller
+		SetActorRotation(TargetRotation);
 	}
 
-	// Log rotation for debugging
-	//UE_LOG(LogTemp, Warning, TEXT("Character rotated to face target location: %s"), *TargetRotation.ToString());
-
-	// Step 4: Execute the custom fire function
-	//GetWorld()->GetTimerManager().SetTimer(FireTimerHandle, FTimerDelegate::CreateUObject(this, &ATP3ShootCharacter::FireAtTarget, TargetLocation), 0.2f, false);
 	FireAtTarget(TargetLocation);
 }
+
 
 void ATP3ShootCharacter::FireAtTarget(FVector TargetLocation)
 {
