@@ -12,7 +12,8 @@
 #include "Kismet/GameplayStatics.h"
 #include <Perception/AISense_Sight.h>
 #include <BehaviorTree/BlackboardComponent.h>
-
+#include "TP3AIShootCharacter.h"
+#include "TPSAIController.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ATP3ShootCharacter
@@ -162,6 +163,19 @@ void ATP3ShootCharacter::Fire()
 		{
 			// Call TakeDamage function
 			HitCharacter->TakeDamage(10);
+			if (ATP3AIShootCharacter* AIAgent = Cast<ATP3AIShootCharacter>(HitCharacter))
+			{
+				// Récupérer le contrôleur de l'IA
+				if (AAIController* AIController = Cast<AAIController>(AIAgent->GetController()))
+				{
+					// Récupérer le Blackboard associé
+					if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+					{
+						// Définir la clé 'isFire' à true dans le Blackboard
+						BlackboardComp->SetValueAsBool("isFire", true);
+					}
+				}
+			}
 		}
 	}
 
@@ -294,6 +308,7 @@ void ATP3ShootCharacter::MoveRight(float Value)
 
 void ATP3ShootCharacter::TakeDamage(float DamageAmount)
 {
+	Shooter = this;
 	if (DamageAmount <= 0) return;
 
 	CurrentHealth -= DamageAmount;

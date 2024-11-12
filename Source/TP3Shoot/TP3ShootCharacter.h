@@ -29,6 +29,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
+	ATP3ShootCharacter Shooter;
+
 public:
 
 	// Add a gun skeletal mesh component
