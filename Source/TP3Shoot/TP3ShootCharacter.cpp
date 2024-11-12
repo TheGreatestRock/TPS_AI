@@ -293,10 +293,10 @@ void ATP3ShootCharacter::MoveRight(float Value)
 	}
 }
 
-void ATP3ShootCharacter::TakeDamage(float DamageAmount)
+void ATP3ShootCharacter::TakeDamage(float DamageAmount, ATP3ShootCharacter* Attacker)
 {
 	if (DamageAmount <= 0) return;
-
+	LastAttacker = Attacker;
 	CurrentHealth -= DamageAmount;
 	if (CurrentHealth <= 0)
 	if (CurrentHealth <= 0)
@@ -363,7 +363,7 @@ void ATP3ShootCharacter::FireAtTarget(FVector TargetLocation)
 			// Check if the hit actor is of type ATP3ShootCharacter
 			if (ATP3ShootCharacter* HitCharacter = Cast<ATP3ShootCharacter>(HitActor))
 			{
-				HitCharacter->TakeDamage(10); // Apply damage if the cast is successful
+				HitCharacter->TakeDamage(10, this); // Apply damage if the cast is successful
 			}
 			else
 			{

@@ -118,7 +118,7 @@ public:
 	FVector SpawnLocation;
 
 	// Function to take damage
-	void TakeDamage(float DamageAmount);
+	void TakeDamage(float DamageAmount, ATP3ShootCharacter* Attacker);
 
 	// Function to respawn at a specific location
 	void Respawn(FVector RespawnLocation);
@@ -128,6 +128,8 @@ public:
 	void FireAtTarget(FVector TargetLocation);
 
 	void PlayFireSound();
+
+	ATP3ShootCharacter* LastAttacker;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	USoundBase* FireSound;
