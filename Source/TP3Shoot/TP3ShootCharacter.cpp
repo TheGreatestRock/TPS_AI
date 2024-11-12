@@ -203,6 +203,7 @@ void ATP3ShootCharacter::Fire()
 	);
 
 	UE_LOG(LogTemp, Warning, TEXT("Fire!"));
+	PlayFireSound();
 }
 
 
@@ -397,4 +398,14 @@ void ATP3ShootCharacter::FireAtTarget(FVector TargetLocation)
 
 	// Log firing event
 	UE_LOG(LogTemp, Warning, TEXT("Shot fired at target location!"));
+
+	PlayFireSound();
+}
+
+void ATP3ShootCharacter::PlayFireSound()
+{
+	if (FireSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(this, FireSound, GetActorLocation());
+	}
 }

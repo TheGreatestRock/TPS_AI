@@ -127,6 +127,11 @@ public:
 
 	void FireAtTarget(FVector TargetLocation);
 
+	void PlayFireSound();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
+	USoundBase* FireSound;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
 	TArray<ATP3ShootCharacter*> Teammates;
 
