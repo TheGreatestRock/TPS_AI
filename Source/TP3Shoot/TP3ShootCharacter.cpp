@@ -167,7 +167,7 @@ void ATP3ShootCharacter::Fire()
 
 			if (ATP3AIShootCharacter* AIAgent = Cast<ATP3AIShootCharacter>(HitCharacter))
 			{
-				if (Teammates.Contains(AIAgent))
+				if (!Teammates.Contains(AIAgent))
 				{
 					// R�cup�rer le contr�leur de l'IA
 					if (AAIController* AIController = Cast<AAIController>(AIAgent->GetController()))
