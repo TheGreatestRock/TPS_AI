@@ -338,7 +338,6 @@ void ATP3ShootCharacter::ShootAtLocation(FVector TargetLocation)
 	
 	FVector DirectionToTarget = (TargetLocation - GetActorLocation()).GetSafeNormal();
 	FRotator TargetRotation = DirectionToTarget.Rotation();
-	TargetRotation.Pitch = 0;
 
 	if (Controller)
 	{

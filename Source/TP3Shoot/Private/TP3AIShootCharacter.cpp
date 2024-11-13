@@ -6,7 +6,7 @@
 
 ATP3AIShootCharacter::ATP3AIShootCharacter()
 {
-	PrimaryActorTick.bCanEverTick = false; // No need to tick; behavior tree handles AI logic
+	PrimaryActorTick.bCanEverTick = true; // No need to tick; behavior tree handles AI logic
 }
 
 void ATP3AIShootCharacter::BeginPlay()
