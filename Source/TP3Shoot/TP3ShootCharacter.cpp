@@ -164,17 +164,21 @@ void ATP3ShootCharacter::Fire()
 		{
 			// Call TakeDamage function
 			HitCharacter->TakeDamage(10, this);
+
 			if (ATP3AIShootCharacter* AIAgent = Cast<ATP3AIShootCharacter>(HitCharacter))
 			{
-				// R�cup�rer le contr�leur de l'IA
-				if (AAIController* AIController = Cast<AAIController>(AIAgent->GetController()))
+				if (Teammates.Contains(AIAgent))
 				{
-					// R�cup�rer le Blackboard associ�
-					if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+					// R�cup�rer le contr�leur de l'IA
+					if (AAIController* AIController = Cast<AAIController>(AIAgent->GetController()))
 					{
-						// D�finir la cl� 'isFire' � true dans le Blackboard
-						BlackboardComp->SetValueAsBool("IsFire", true);
-						UE_LOG(LogTemp, Warning, TEXT("gggggggggggggggggggggggggggggggggg"));
+						// R�cup�rer le Blackboard associ�
+						if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+						{
+							// D�finir la cl� 'isFire' � true dans le Blackboard
+							BlackboardComp->SetValueAsBool("IsFire", true);
+							UE_LOG(LogTemp, Warning, TEXT("gggggggggggggggggggggggggggggggggg"));
+						}
 					}
 				}
 			}
