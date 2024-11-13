@@ -131,6 +131,8 @@ public:
 
 	void PlayFireSound();
 
+	ATP3ShootCharacter* LastAttacker;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Audio")
 	USoundBase* FireSound;
 

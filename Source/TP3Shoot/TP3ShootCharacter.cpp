@@ -166,13 +166,13 @@ void ATP3ShootCharacter::Fire()
 			HitCharacter->TakeDamage(10, this);
 			if (ATP3AIShootCharacter* AIAgent = Cast<ATP3AIShootCharacter>(HitCharacter))
 			{
-				// Récupérer le contrôleur de l'IA
+				// Rï¿½cupï¿½rer le contrï¿½leur de l'IA
 				if (AAIController* AIController = Cast<AAIController>(AIAgent->GetController()))
 				{
-					// Récupérer le Blackboard associé
+					// Rï¿½cupï¿½rer le Blackboard associï¿½
 					if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
 					{
-						// Définir la clé 'isFire' à true dans le Blackboard
+						// Dï¿½finir la clï¿½ 'isFire' ï¿½ true dans le Blackboard
 						BlackboardComp->SetValueAsBool("IsFire", true);
 						UE_LOG(LogTemp, Warning, TEXT("gggggggggggggggggggggggggggggggggg"));
 					}
