@@ -317,6 +317,20 @@ void ATP3ShootCharacter::TakeDamage(float DamageAmount, ATP3ShootCharacter* TheS
 {
 	if (DamageAmount <= 0) return;
 	Shooter = TheShooter;
+	AController* ControllerHit = GetController();
+	if (ControllerHit)
+	{
+		if (AAIController* AIController = Cast<AAIController>(ControllerHit))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->SetValueAsBool("SeeEnemy", true);
+				UE_LOG(LogTemp, Warning, TEXT("aaaaaaaaaaaaaaaaaaaaaaa"));
+			}
+		}
+	}
+	
+
 	CurrentHealth -= DamageAmount;
 	if (CurrentHealth <= 0)
 	if (CurrentHealth <= 0)
