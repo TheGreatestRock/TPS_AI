@@ -12,6 +12,8 @@
 #include "Kismet/GameplayStatics.h"
 #include <Perception/AISense_Sight.h>
 #include <BehaviorTree/BlackboardComponent.h>
+#include "TPSAIController.h"
+#include "TP3AIShootCharacter.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -161,7 +163,21 @@ void ATP3ShootCharacter::Fire()
 		if (ATP3ShootCharacter* HitCharacter = Cast<ATP3ShootCharacter>(CameraHitResult.GetActor()))
 		{
 			// Call TakeDamage function
-			HitCharacter->TakeDamage(10);
+			HitCharacter->TakeDamage(10, this);
+			if (ATP3AIShootCharacter* AIAgent = Cast<ATP3AIShootCharacter>(HitCharacter))
+			{
+				// Récupérer le contrôleur de l'IA
+				if (AAIController* AIController = Cast<AAIController>(AIAgent->GetController()))
+				{
+					// Récupérer le Blackboard associé
+					if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+					{
+						// Définir la clé 'isFire' à true dans le Blackboard
+						BlackboardComp->SetValueAsBool("IsFire", true);
+						UE_LOG(LogTemp, Warning, TEXT("gggggggggggggggggggggggggggggggggg"));
+					}
+				}
+			}
 		}
 	}
 
@@ -293,10 +309,10 @@ void ATP3ShootCharacter::MoveRight(float Value)
 	}
 }
 
-void ATP3ShootCharacter::TakeDamage(float DamageAmount)
+void ATP3ShootCharacter::TakeDamage(float DamageAmount, ATP3ShootCharacter* TheShooter)
 {
 	if (DamageAmount <= 0) return;
-
+	Shooter = TheShooter;
 	CurrentHealth -= DamageAmount;
 	if (CurrentHealth <= 0)
 	if (CurrentHealth <= 0)
@@ -363,7 +379,7 @@ void ATP3ShootCharacter::FireAtTarget(FVector TargetLocation)
 			// Check if the hit actor is of type ATP3ShootCharacter
 			if (ATP3ShootCharacter* HitCharacter = Cast<ATP3ShootCharacter>(HitActor))
 			{
-				HitCharacter->TakeDamage(10); // Apply damage if the cast is successful
+				HitCharacter->TakeDamage(10, this); // Apply damage if the cast is successful
 			}
 			else
 			{

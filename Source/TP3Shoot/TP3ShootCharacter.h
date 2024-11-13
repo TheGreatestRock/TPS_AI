@@ -29,6 +29,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
+
+
 public:
 
 	// Add a gun skeletal mesh component
@@ -118,7 +120,7 @@ public:
 	FVector SpawnLocation;
 
 	// Function to take damage
-	void TakeDamage(float DamageAmount);
+	void TakeDamage(float DamageAmount, ATP3ShootCharacter* TheShooter);
 
 	// Function to respawn at a specific location
 	void Respawn(FVector RespawnLocation);
@@ -138,5 +140,10 @@ public:
 
     private:
         FTimerHandle FireTimerHandle;
+
+	public: 
+		UPROPERTY(BlueprintReadOnly)
+		ATP3ShootCharacter* Shooter;
+
 };
 
