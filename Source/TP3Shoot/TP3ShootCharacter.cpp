@@ -343,8 +343,14 @@ void ATP3ShootCharacter::TakeDamage(float DamageAmount, ATP3ShootCharacter* TheS
 
 void ATP3ShootCharacter::Respawn(FVector RespawnLocation)
 {
+	FVector Location = GetActorLocation() + (GetActorForwardVector() * 100);
+	if (dedbody)
+	{
+		GetWorld()->SpawnActor<AActor>(dedbody, Location, FRotator(0, 0, 0), FActorSpawnParameters());
+	}
 	SetActorLocation(RespawnLocation); // Move to spawn location
 	CurrentHealth = MaxHealth; // Reset health
+	
 }
 
 void ATP3ShootCharacter::ShootAtLocation(FVector TargetLocation)

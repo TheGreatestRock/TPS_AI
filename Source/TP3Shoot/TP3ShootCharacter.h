@@ -113,7 +113,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth = 100.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float CurrentHealth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
@@ -138,6 +138,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
 	TArray<ATP3ShootCharacter*> Teammates;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ded")
+	TSubclassOf<AActor> dedbody;
 
 
     private:
