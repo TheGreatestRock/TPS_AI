@@ -12,6 +12,8 @@
 #include "Kismet/GameplayStatics.h"
 #include <Perception/AISense_Sight.h>
 #include <BehaviorTree/BlackboardComponent.h>
+#include "TPSAIController.h"
+#include "TP3AIShootCharacter.h"
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -161,7 +163,25 @@ void ATP3ShootCharacter::Fire()
 		if (ATP3ShootCharacter* HitCharacter = Cast<ATP3ShootCharacter>(CameraHitResult.GetActor()))
 		{
 			// Call TakeDamage function
-			HitCharacter->TakeDamage(10);
+			HitCharacter->TakeDamage(10, this);
+
+			if (ATP3AIShootCharacter* AIAgent = Cast<ATP3AIShootCharacter>(HitCharacter))
+			{
+				if (!Teammates.Contains(AIAgent))
+				{
+					// R�cup�rer le contr�leur de l'IA
+					if (AAIController* AIController = Cast<AAIController>(AIAgent->GetController()))
+					{
+						// R�cup�rer le Blackboard associ�
+						if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+						{
+							// D�finir la cl� 'isFire' � true dans le Blackboard
+							BlackboardComp->SetValueAsBool("IsFire", true);
+							UE_LOG(LogTemp, Warning, TEXT("gggggggggggggggggggggggggggggggggg"));
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -293,10 +313,24 @@ void ATP3ShootCharacter::MoveRight(float Value)
 	}
 }
 
-void ATP3ShootCharacter::TakeDamage(float DamageAmount, ATP3ShootCharacter* Attacker)
+void ATP3ShootCharacter::TakeDamage(float DamageAmount, ATP3ShootCharacter* TheShooter)
 {
 	if (DamageAmount <= 0) return;
-	LastAttacker = Attacker;
+	Shooter = TheShooter;
+	AController* ControllerHit = GetController();
+	if (ControllerHit)
+	{
+		if (AAIController* AIController = Cast<AAIController>(ControllerHit))
+		{
+			if (UBlackboardComponent* BlackboardComp = AIController->GetBlackboardComponent())
+			{
+				BlackboardComp->SetValueAsBool("SeeEnemy", true);
+				UE_LOG(LogTemp, Warning, TEXT("aaaaaaaaaaaaaaaaaaaaaaa"));
+			}
+		}
+	}
+	
+
 	CurrentHealth -= DamageAmount;
 	if (CurrentHealth <= 0)
 	if (CurrentHealth <= 0)
@@ -309,8 +343,14 @@ void ATP3ShootCharacter::TakeDamage(float DamageAmount, ATP3ShootCharacter* Atta
 
 void ATP3ShootCharacter::Respawn(FVector RespawnLocation)
 {
+	FVector Location = GetActorLocation() + (GetActorForwardVector() * 100);
+	if (dedbody)
+	{
+		GetWorld()->SpawnActor<AActor>(dedbody, Location, FRotator(0, 0, 0), FActorSpawnParameters());
+	}
 	SetActorLocation(RespawnLocation); // Move to spawn location
 	CurrentHealth = MaxHealth; // Reset health
+	
 }
 
 void ATP3ShootCharacter::ShootAtLocation(FVector TargetLocation)
@@ -318,7 +358,6 @@ void ATP3ShootCharacter::ShootAtLocation(FVector TargetLocation)
 	
 	FVector DirectionToTarget = (TargetLocation - GetActorLocation()).GetSafeNormal();
 	FRotator TargetRotation = DirectionToTarget.Rotation();
-	TargetRotation.Pitch = 0;
 
 	if (Controller)
 	{

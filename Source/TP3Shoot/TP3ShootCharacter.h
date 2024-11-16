@@ -29,6 +29,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Input)
 	float TurnRateGamepad;
 
+
+
 public:
 
 	// Add a gun skeletal mesh component
@@ -111,14 +113,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float MaxHealth = 100.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
 	float CurrentHealth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn")
 	FVector SpawnLocation;
 
 	// Function to take damage
-	void TakeDamage(float DamageAmount, ATP3ShootCharacter* Attacker);
+	void TakeDamage(float DamageAmount, ATP3ShootCharacter* TheShooter);
 
 	// Function to respawn at a specific location
 	void Respawn(FVector RespawnLocation);
@@ -137,8 +139,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Team")
 	TArray<ATP3ShootCharacter*> Teammates;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="ded")
+	TSubclassOf<AActor> dedbody;
+
 
     private:
         FTimerHandle FireTimerHandle;
+
+	public: 
+		UPROPERTY(BlueprintReadOnly)
+		ATP3ShootCharacter* Shooter;
+
 };
 
